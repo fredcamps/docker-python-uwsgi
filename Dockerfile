@@ -25,6 +25,8 @@ RUN tar -zxf Python-${PYTHON_VER}.tgz && cd Python-${PYTHON_VER} \
   && ./configure --prefix=/opt/python && make && make install \
   && cd .. && rm -rf Python-* && cp /opt/python/bin/* /usr/bin
 
+EXPOSE 80 8000 443
+
 ADD ./setup.sh /setup.sh
 RUN /setup.sh && rm -rf /setup.sh
 
