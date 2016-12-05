@@ -23,6 +23,7 @@ RUN apt-get update && apt-get upgrade -y -q \
   uwsgi-plugin-python3 \
   libsqlite3-dev \
   cron \
+  wkhtmltopdf \
   && apt-get autoremove -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
