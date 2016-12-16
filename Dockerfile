@@ -5,8 +5,9 @@ MAINTAINER fredcamps
 ENV PYTHON_VER 3.4.5
 
 RUN apt-get update && apt-get upgrade -y -q \
-  && apt-get install -y -q --no-install-recommends -y \
+  && apt-get install -y -q --no-install-recommends \
   build-essential \
+  locales \
   libssl-dev \
   libbz2-dev \
   libsasl2-dev \
@@ -22,24 +23,32 @@ RUN apt-get update && apt-get upgrade -y -q \
   uwsgi-plugin-python \
   uwsgi-plugin-python3 \
   libsqlite3-dev \
+  libncurses5-dev \
   cron \
   && apt-get autoremove -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL C
+
 RUN curl -O https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}.tgz \
   && tar -zxf Python-${PYTHON_VER}.tgz && cd Python-${PYTHON_VER} \
   && ./configure --prefix=/opt/python && make && make install \
-  && cd .. && rm -rf Python-* && cp /opt/python/bin/* /usr/bin
-
-RUN v=$(echo $PYTHON_VER | cut -d '.' -f 1 ) \
-  && pip${v} install --upgrade pip virtualenvwrapper setuptools
+  && cd .. && rm -rf Python-* \
+  && v=$(echo $PYTHON_VER | cut -d '.' -f 1 ) \
+  && ln -sf $(which python) /opt/python/bin/python \
+  && /opt/python/bin/pip${v} install --upgrade pip virtualenvwrapper setuptools
 
 RUN adduser --disabled-password --gecos '' python
 
 ADD ./supervisord.conf /etc/supervisor/supervisord.conf
+ADD ./profile /home/python/.profile
 ADD ./virtualenv /home/python/.virtualenv
 RUN chown python:python /home/python/.virtualenv \
+  && chown python:python /home/python/.profile \
   && su python -c "echo -e \"source /home/python/.virtualenv\" >> /home/python/.bashrc"
 
 RUN chown -R python:python /var/log/uwsgi
