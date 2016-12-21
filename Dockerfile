@@ -6,6 +6,7 @@ ENV PYTHON_VER 3.4.5
 
 RUN apt-get update && apt-get upgrade -y -q \
   && apt-get install -y -q --no-install-recommends \
+  autoconf \
   build-essential \
   locales \
   libssl-dev \
@@ -24,6 +25,12 @@ RUN apt-get update && apt-get upgrade -y -q \
   uwsgi-plugin-python3 \
   libsqlite3-dev \
   libncurses5-dev \
+  libxml2-dev \
+  libxslt1-dev \
+  procps \
+  pkg-config \
+  libcurl4-gnutls-dev \
+  libpcre3-dev \
   cron \
   && apt-get autoremove -y \
   && apt-get clean \
@@ -37,7 +44,7 @@ ENV LC_ALL C
 RUN curl -O https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}.tgz \
   && tar -zxf Python-${PYTHON_VER}.tgz && cd Python-${PYTHON_VER} \
   && ./configure --prefix=/opt/python && make && make install \
-  && cd .. && rm -rf Python-* \
+  && cd .. && rm -rf Python-${PYTHON_VER}.tgz && mv Python-${PYTHON_VER} /opt/ \
   && v=$(echo $PYTHON_VER | cut -d '.' -f 1 ) \
   && ln -sf $(which python) /opt/python/bin/python \
   && /opt/python/bin/pip${v} install --upgrade pip virtualenvwrapper setuptools
@@ -56,4 +63,4 @@ RUN chown -R python:python /var/log/uwsgi
 
 EXPOSE 9001
 
-CMD ["/usr/bin/supervisord", "-nc", "/etc/supervisor/supervisord.conf"]
+CMD /usr/bin/supervisord -nc /etc/supervisor/supervisord.conf
