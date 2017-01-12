@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM ubuntu:xenial
 
 MAINTAINER fredcamps
 
@@ -20,9 +20,7 @@ RUN apt-get update && apt-get upgrade -y -q \
   libmysqlclient-dev \
   libmongo-client-dev \
   openssh-client \
-  uwsgi \
-  uwsgi-plugin-python \
-  uwsgi-plugin-python3 \
+  software-properties-common \
   libsqlite3-dev \
   libncurses5-dev \
   libxml2-dev \
@@ -32,6 +30,7 @@ RUN apt-get update && apt-get upgrade -y -q \
   libcurl4-gnutls-dev \
   libpcre3-dev \
   cron \
+  phantomjs \
   && apt-get autoremove -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
@@ -47,19 +46,19 @@ RUN curl -O https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}
   && cd .. && rm -rf Python-${PYTHON_VER}.tgz && mv Python-${PYTHON_VER} /opt/ \
   && v=$(echo $PYTHON_VER | cut -d '.' -f 1 ) \
   && ln -sf $(which python) /opt/python/bin/python \
-  && /opt/python/bin/pip${v} install --upgrade pip virtualenvwrapper setuptools
+  && /opt/python/bin/pip${v} install --upgrade pip virtualenvwrapper setuptools uwsgi \
+  && mkdir -p /var/log/uwsgi
 
 RUN adduser --disabled-password --gecos '' python
 
 ADD ./supervisord.conf /etc/supervisor/supervisord.conf
-ADD ./profile /home/python/.profile
 ADD ./virtualenv /home/python/.virtualenv
+ADD ./bashrc /home/python/.bashrc
+
 RUN chown python:python /home/python/.virtualenv \
-  && chown python:python /home/python/.profile \
-  && su python -c "echo -e \"source /home/python/.virtualenv\" >> /home/python/.bashrc"
+    && chown python:python /home/python/.bashrc
 
 RUN chown -R python:python /var/log/uwsgi
-
 
 EXPOSE 9001
 
