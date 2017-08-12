@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM debian:jessie
 
 MAINTAINER fredcamps
 
@@ -29,8 +29,7 @@ RUN apt-get update && apt-get upgrade -y -q \
   pkg-config \
   libcurl4-gnutls-dev \
   libpcre3-dev \
-  cron \
-  phantomjs \
+  cron
   && apt-get autoremove -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
